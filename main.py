@@ -79,7 +79,7 @@ class Tile(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, storona):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((10, 20))
         self.image.fill('yellow')
@@ -87,12 +87,18 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedy = -10
+        self.storona = storona
 
     def update(self):
-        self.rect.y += self.speedy
-        # убить, если он заходит за верхнюю часть экрана
-        if self.rect.bottom < 0:
-            self.kill()
+        #self.rect.y += self.speedy
+        if self.storona == 'u':
+            self.rect.y += self.speedy
+        if self.storona == 'd':
+            self.rect.y -= self.speedy
+        if self.storona == 'r':
+            self.rect.x -= self.speedy
+        if self.storona == 'l':
+            self.rect.x += self.speedy
 
 
 class Player(pygame.sprite.Sprite):
@@ -112,8 +118,8 @@ class Player(pygame.sprite.Sprite):
         for sprite in tiles_group:
             camera.apply(sprite)
 
-    def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top)
+    def shoot(self, storona):
+        bullet = Bullet(self.rect.centerx, self.rect.top + 30, storona)
         all_sprites.add(bullet)
         bullets.add(bullet)
 
@@ -192,6 +198,7 @@ camera = Camera()
 level_map = load_level("map.map")
 player, max_x, max_y = generate_level(level_map)
 running = True
+storona = 'u'
 
 while running:
     for event in pygame.event.get():
@@ -199,16 +206,20 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                player.shoot()
+                player.shoot(storona)
             if event.key == pygame.K_w:
                 move(player, "up")
+                storona = 'u'
             elif event.key == pygame.K_s:
                 move(player, "down")
+                storona = 'd'
             elif event.key == pygame.K_a:
                 move(player, "left")
+                storona = 'l'
             elif event.key == pygame.K_d:
                 move(player, "right")
-    screen.fill(pygame.Color("white"))
+                storona = 'r'
+    screen.fill(pygame.Color("black"))
     camera.update(player)
     tiles_group.draw(screen)
     player_group.draw(screen)
